@@ -9,7 +9,7 @@ Overview · Features · Screenshots Placeholder · Installation · GitHub Pages 
 
 ## Overview
 The UI is in Greek (navy `#0B1F3A`, gold `#D4AF37`, white; light & dark themes, responsive, WCAG 2.2 oriented).
-All data lives in the browser of the person using it. First start loads **sample data** (22 members from the lodge roster with *fictitious* payments) so every screen is populated; replace it with your own via *Εισαγωγή* and clear the sample in *Ρυθμίσεις*.
+All data lives in the browser of the person using it. First start loads **sample data** (22 members from the lodge roster with names and categories only, no payments); replace it with your own via *Εισαγωγή* and clear the sample in *Ρυθμίσεις*.
 
 ## Features
 - **Member registry** – add, edit, soft-delete, restore, archive, former members; Excel/CSV/PDF/JSON export and printing; full profile page (registry data, contacts, degree progression, offices, payment history, analytics, notes, timeline).
@@ -55,7 +55,7 @@ tools/         make_seed.py
 
 > This copy lives in the `tameio/` folder of the lodge-website repository. To deploy it from there, either copy the folder contents into the dedicated repository above, or publish this repo with Pages pointing at the folder via a workflow. All paths are relative, so it works under any sub-path.
 
-> **Privacy:** a GitHub Pages site is public. Never commit real member data (phones, e-mails, payments). Import real data only through the app on the devices that need it. The bundled sample contains names, registry numbers, degrees and dates only; contacts are blank and payments are fictitious.
+> **Privacy:** a GitHub Pages site is public. Never commit real member data (phones, e-mails, payments). Import real data only through the app on the devices that need it. The bundled sample contains names, registry numbers, degrees and dates only; contacts are blank and no payments are bundled.
 
 **CI (`.github/workflows/deploy.yml`)** validates HTML, CSS and JavaScript on every push, checks version consistency, builds the ZIP and – for tags `vX.Y.Z` – creates a GitHub release with changelog notes.
 
@@ -93,6 +93,7 @@ Status values: `active`, `former`, `archived`, `deleted` (soft delete). Schema m
 
 ## Treasury Module Guide
 - **Εισφορές ανά μέλος**: one money cell per member for 2026–2030. Type the new *total paid* and press Enter/Tab: the difference is stored as an adjustment ledger entry, so history is never lost.
+- **Categories & fees (2027):** Τακτικό 200 €, Μέτοικο 100 €, Υιοθετημένο 20 €, Επίτιμο 0, Ομότιμο 0, Διαγραμμένο (not a member, no fee). Other years are 0 until you set them in *Πρόγραμμα εισφορών*.
 - **Expected fee** = fee schedule(category, year) or personal override; 0 for exempt members, years before initiation and years after leaving.
 - **Debt** = Σ max(0, expected − paid) from `debtFromYear` to the current year. **Collection rate** = min(paid, expected)/expected. **Debt ratio** = outstanding/expected.
 - Tabs: grid · ledger · debtors · fee schedule · analysis & forecast. Exports use the Reports engine.

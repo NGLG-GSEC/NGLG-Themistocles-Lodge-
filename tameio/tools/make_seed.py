@@ -5,7 +5,7 @@ Usage:  python3 tools/make_seed.py path/to/Book2.xlsx
 
 Outputs (all deterministic):
   sample-data/members.json   - members in the internal data model (no phone / e-mail, see README)
-  sample-data/ledger.json    - realistic (fictitious) payment history
+  sample-data/ledger.json    - empty (no payments)
   sample-data/seed.json      - members + ledger + default settings (what the app loads on first start)
   sample-data/treasury-summary.json
   assets/samples/Book2-sample.xlsx|csv|json - import samples in the exact Book2.xlsx layout
@@ -20,11 +20,9 @@ IDS = [960003, 960006, 960007, 960008, 960009, 960015, 960018, 960019, 960020, 9
        960023, 960025, 960028, 960031, 960032, 960033, 960034, 960035, 960036, 960037, 960038]
 DEGREE = {"ΜΑΘΗΤΗΣ": "ΜΑΘΗΤΗΣ", "ΕΤΑΙΡΟΣ": "ΕΤΑΙΡΟΣ", "ΔΙΔΑΣΚΑΛΟΣ": "ΔΙΔΑΣΚΑΛΟΣ"}
 CAT = {"1. ΤΑΚΤΙΚΟ": "ΤΑΚΤΙΚΟ", "4. ΥΙΟΘΕΤΗΜΕΝΟ": "ΥΙΟΘΕΤΗΜΕΝΟ", "5. ΔΙΑΓΡΑΦΕΝ": "ΔΙΑΓΡΑΦΕΝ"}
-FEES = {
-    "ΤΑΚΤΙΚΟ":      {"2024": 280, "2025": 280, "2026": 300, "2027": 300, "2028": 320, "2029": 320, "2030": 340},
-    "ΥΙΟΘΕΤΗΜΕΝΟ":  {"2024": 140, "2025": 140, "2026": 150, "2027": 150, "2028": 160, "2029": 160, "2030": 170},
-    "ΕΠΙΤΙΜΟ":      {y: 0 for y in map(str, range(2024, 2031))},
-    "ΔΙΑΓΡΑΦΕΝ":    {y: 0 for y in map(str, range(2024, 2031))},
+FEES = {  # annual contribution per category; only 2027 is defined so far
+    c: {str(y): (amt if y == 2027 else 0) for y in range(2026, 2031)}
+    for c, amt in {"ΤΑΚΤΙΚΟ": 200, "ΜΕΤΟΙΚΟ": 100, "ΥΙΟΘΕΤΗΜΕΝΟ": 20, "ΕΠΙΤΙΜΟ": 0, "ΟΜΟΤΙΜΟ": 0, "ΔΙΑΓΡΑΦΕΝ": 0}.items()
 }
 
 
@@ -73,61 +71,14 @@ def main(path):
             m["offices"].append({"office": office, "from": office_from or "2026-06-09", "to": ""})
         members.append(m)
 
-    # ---- payment history (fictitious, deterministic) ----
-    rng = Rng(96)
-    ledger, receipt = [], {}
-
-    def pay(m, year, amount, date, method=None, note=""):
-        receipt[year] = receipt.get(year, 0) + 1
-        ledger.append({"id": f"p_{len(ledger)+1:04d}", "memberId": m["id"], "year": year, "amount": float(amount),
-                       "date": date, "method": method or rng.pick(["bank", "bank", "cash", "card"]),
-                       "receipt": f"ΑΠ-{year}-{receipt[year]:04d}", "note": note, "sample": True})
-
-    def month_date(year, month, spread=27):
-        return f"{year}-{month:02d}-{1 + int(rng.next() * spread):02d}"
-
-    profile = {  # how each member behaves in 2026 (percent of fee paid, number of installments)
-        960003: (1.0, 1), 960006: (0.0, 0), 960007: (1.0, 2), 960008: (1.0, 1), 960009: (1.0, 3),
-        960015: (0.5, 2), 960018: (0.0, 0), 960019: (1.0, 1), 960020: (1.0, 3), 960021: (1.0, 2),
-        960022: (0.34, 1), 960023: (0.5, 1), 960025: (1.0, 1), 960028: (0.67, 2), 960031: (0.5, 1),
-        960032: (1.0, 3), 960033: (1.0, 1), 960034: (0.34, 1), 960035: (0.0, 0), 960036: (0.67, 2),
-        960037: (0.5, 1), 960038: (1.0, 1),
-    }
-    for m in members:
-        n = int(m["registryNumber"]); fee26 = FEES[m["category"]]["2026"]; fee25 = FEES[m["category"]]["2025"]
-        init_year = int(m["initiationDate"][:4]) if m["initiationDate"] else 0
-        # 2025 history
-        if init_year <= 2025 and n not in (960006, 960018):
-            part = rng.next()
-            if part < 0.8: pay(m, 2025, fee25, month_date(2025, 1 + int(rng.next() * 4)))
-            elif part < 0.92:
-                half = fee25 / 2
-                pay(m, 2025, half, month_date(2025, 2)); pay(m, 2025, half, month_date(2025, 9))
-            else: pay(m, 2025, round(fee25 * 0.6, 2), month_date(2025, 5))
-        elif n in (960006, 960018):
-            pay(m, 2025, round(fee25 * 0.5, 2), month_date(2025, 6))
-        # 2026
-        share, k = profile[n]
-        total = round(fee26 * share, 2)
-        if k:
-            part = round(total / k, 2); months = [1, 4, 7][:k] if k > 1 else [1 + int(rng.next() * 6)]
-            acc = 0
-            for i, mo in enumerate(months):
-                a = part if i < k - 1 else round(total - acc, 2)
-                acc += a
-                pay(m, 2026, a, month_date(2026, mo))
-    # two members pre-pay 2027
-    for n in (960003, 960025):
-        m = next(x for x in members if x["registryNumber"] == str(n))
-        pay(m, 2027, 150, "2026-09-" + f"{10 + int(rng.next() * 15):02d}", "bank", "Προπληρωμή 2027")
-    ledger.sort(key=lambda p: (p["date"], p["id"]))
+    ledger = []  # no payments: only names + categories are kept
 
     settings = {
         "lodge": {"name": "Θεμιστοκλής", "number": 96, "fullName": "Συμβολική Στοά Θεμιστοκλής υπ’ αριθμ. 96",
                   "province": "Επαρχιακή Μεγάλη Στοά Πειραιώς και Αιγαίου", "grandLodge": "Εθνική Μεγάλη Στοά της Ελλάδος"},
-        "fees": FEES,
+        "fees": FEES, "asOfYear": 2027, "debtFromYear": 2027,
     }
-    seed = {"schemaVersion": 1, "generatedFrom": "Book2.xlsx (22 lodge records)", "sample": True,
+    seed = {"schemaVersion": 1, "version": 2, "generatedFrom": "Book2.xlsx (22 lodge records)", "sample": True,
             "members": members, "ledger": ledger, "settings": settings}
 
     (ROOT / "sample-data").mkdir(exist_ok=True)
