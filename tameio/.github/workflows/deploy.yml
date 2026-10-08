@@ -1,0 +1,57 @@
+name: Validate & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Validate HTML
+        run: npx --yes html-validate@9 index.html
+      - name: Validate CSS
+        run: npx --yes csstree-validator@3 styles.css
+      - name: Validate JavaScript (ES2023 modules)
+        run: |
+          npm install --no-save acorn@8
+          for f in app.js worker.js service-worker.js js/*.js js/views/*.js; do
+            npx acorn --ecma2023 --module "$f" > /dev/null || exit 1
+          done
+      - name: Validate JSON
+        run: |
+          python3 -c "import json,glob;[json.load(open(f,encoding='utf-8')) for f in glob.glob('**/*.json',recursive=True)]"
+      - name: Version consistency (VERSION == config.js == service-worker.js)
+        run: |
+          V=$(cat VERSION)
+          grep -q "version: '$V'" js/config.js
+          grep -q "const VERSION = '$V'" service-worker.js
+      - name: Package ZIP
+        run: python3 build_release.py --zip-only
+      - uses: actions/upload-artifact@v4
+        with:
+          name: THEMISTOCLES96-TAMEIO
+          path: THEMISTOCLES96-TAMEIO.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Build ZIP and release notes
+        run: |
+          python3 build_release.py --zip-only
+          git log --pretty=format:'- %s (%h)' "$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)"..HEAD > notes.md
+      - name: Create GitHub release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: gh release create "${GITHUB_REF_NAME}" THEMISTOCLES96-TAMEIO.zip --title "TAMEIO ${GITHUB_REF_NAME}" --notes-file notes.md
