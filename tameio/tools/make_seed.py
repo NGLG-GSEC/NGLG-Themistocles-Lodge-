@@ -20,8 +20,8 @@ IDS = [960003, 960006, 960007, 960008, 960009, 960015, 960018, 960019, 960020, 9
        960023, 960025, 960028, 960031, 960032, 960033, 960034, 960035, 960036, 960037, 960038]
 DEGREE = {"ΜΑΘΗΤΗΣ": "ΜΑΘΗΤΗΣ", "ΕΤΑΙΡΟΣ": "ΕΤΑΙΡΟΣ", "ΔΙΔΑΣΚΑΛΟΣ": "ΔΙΔΑΣΚΑΛΟΣ"}
 CAT = {"1. ΤΑΚΤΙΚΟ": "ΤΑΚΤΙΚΟ", "4. ΥΙΟΘΕΤΗΜΕΝΟ": "ΥΙΟΘΕΤΗΜΕΝΟ", "5. ΔΙΑΓΡΑΦΕΝ": "ΔΙΑΓΡΑΦΕΝ"}
-FEES = {  # annual contribution per category; only 2027 is defined so far
-    c: {str(y): (amt if y == 2027 else 0) for y in range(2026, 2031)}
+FEES = {  # annual contribution per category; same amount every year 2026-2030
+    c: {str(y): amt for y in range(2026, 2031)}
     for c, amt in {"ΤΑΚΤΙΚΟ": 200, "ΜΕΤΟΙΚΟ": 100, "ΥΙΟΘΕΤΗΜΕΝΟ": 20, "ΕΠΙΤΙΜΟ": 0, "ΟΜΟΤΙΜΟ": 0, "ΔΙΑΓΡΑΦΕΝ": 0}.items()
 }
 
@@ -78,7 +78,7 @@ def main(path):
                   "province": "Επαρχιακή Μεγάλη Στοά Πειραιώς και Αιγαίου", "grandLodge": "Εθνική Μεγάλη Στοά της Ελλάδος"},
         "fees": FEES, "asOfYear": 2027, "debtFromYear": 2027,
     }
-    seed = {"schemaVersion": 1, "version": 2, "generatedFrom": "Book2.xlsx (22 lodge records)", "sample": True,
+    seed = {"schemaVersion": 1, "version": 3, "generatedFrom": "Book2.xlsx (22 lodge records)", "sample": True,
             "members": members, "ledger": ledger, "settings": settings}
 
     (ROOT / "sample-data").mkdir(exist_ok=True)
