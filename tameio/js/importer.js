@@ -18,7 +18,7 @@ export { formatPhone, isEmail };
 /** Normalise a date-like value to ISO or return null when invalid. */
 export const normalizeDate = toISODate;
 
-const CATEGORY_ALIASES = { regular: 'ΤΑΚΤΙΚΟ', active: 'ΤΑΚΤΙΚΟ', adopted: 'ΥΙΟΘΕΤΗΜΕΝΟ', affiliated: 'ΥΙΟΘΕΤΗΜΕΝΟ', honorary: 'ΕΠΙΤΙΜΟ', 'struck off': 'ΔΙΑΓΡΑΦΕΝ', struck: 'ΔΙΑΓΡΑΦΕΝ', removed: 'ΔΙΑΓΡΑΦΕΝ' };
+const CATEGORY_ALIASES = { ΔΙΕΓΡΑΦΕΝ: 'ΔΙΑΓΡΑΦΕΝ', ΔΙΕΓΡΑΜΜΕΝΟ: 'ΔΙΑΓΡΑΦΕΝ', ΔΙΑΓΡΑΜΜΕΝΟ: 'ΔΙΑΓΡΑΦΕΝ', metoikos: 'ΜΕΤΟΙΚΟ', 'emeritus': 'ΟΜΟΤΙΜΟ', regular: 'ΤΑΚΤΙΚΟ', active: 'ΤΑΚΤΙΚΟ', adopted: 'ΥΙΟΘΕΤΗΜΕΝΟ', affiliated: 'ΥΙΟΘΕΤΗΜΕΝΟ', honorary: 'ΕΠΙΤΙΜΟ', 'struck off': 'ΔΙΑΓΡΑΦΕΝ', struck: 'ΔΙΑΓΡΑΦΕΝ', removed: 'ΔΙΑΓΡΑΦΕΝ' };
 const DEGREE_ALIASES = { 'entered apprentice': 'ΜΑΘΗΤΗΣ', apprentice: 'ΜΑΘΗΤΗΣ', ea: 'ΜΑΘΗΤΗΣ', 'fellow craft': 'ΕΤΑΙΡΟΣ', fellowcraft: 'ΕΤΑΙΡΟΣ', fc: 'ΕΤΑΙΡΟΣ', 'master mason': 'ΔΙΔΑΣΚΑΛΟΣ', master: 'ΔΙΔΑΣΚΑΛΟΣ', mm: 'ΔΙΔΑΣΚΑΛΟΣ', '1': 'ΜΑΘΗΤΗΣ', '2': 'ΕΤΑΙΡΟΣ', '3': 'ΔΙΔΑΣΚΑΛΟΣ' };
 const STATUS_ALIASES = { ενεργο: 'active', ενεργος: 'active', active: 'active', πρωην: 'former', former: 'former', διαγραφεν: 'former', διαγραμμενο: 'deleted', deleted: 'deleted', αρχειοθετημενο: 'archived', archived: 'archived', 'εκτος': 'former', 'εκτος εδρας': 'former' };
 
@@ -27,7 +27,7 @@ export function normalizeCategory(v) {
   if (!t) return { value: '', known: true };
   if (CATEGORIES[t]) return { value: t, known: true };
   for (const k of Object.keys(CATEGORIES)) if (t.startsWith(k.slice(0, 6))) return { value: k, known: true };
-  const a = CATEGORY_ALIASES[normText(t)];
+  const a = CATEGORY_ALIASES[t] || CATEGORY_ALIASES[normText(t)];
   return a ? { value: a, known: true } : { value: t, known: false };
 }
 export function normalizeDegree(v) {

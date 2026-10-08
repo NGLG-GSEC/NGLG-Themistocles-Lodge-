@@ -98,12 +98,21 @@ export class Store {
       raw = { members: seed.members || [], ledger: seed.ledger || [], settings: { ...clone(DEFAULT_SETTINGS), ...(seed.settings || {}) }, meta: { sample: !!seed.sample, schemaVersion: APP.schemaVersion } };
       this.fromSeed = true;
     }
+    // An older, untouched sample data set is replaced by the current seed (members the user added keep the data safe).
+    if (!this.fromSeed && this.seed && raw.meta?.sample && (raw.meta.seedVersion || 1) < (this.seed.version || 1)
+      && raw.members.every((m) => this.seed.members.some((s) => s.id === m.id))) {
+      const s = clone(this.seed);
+      raw.members = s.members; raw.ledger = s.ledger;
+      raw.settings = { ...(raw.settings || {}), fees: s.settings.fees, lodge: s.settings.lodge, asOfYear: s.settings.asOfYear, debtFromYear: s.settings.debtFromYear };
+      raw.meta = { ...raw.meta, seedVersion: s.version }; this.reseeded = true;
+    }
     const from = raw.meta?.schemaVersion ?? 0;
     raw = migrate({ ...this.#empty(), ...raw }, from);
     raw.settings = { ...clone(DEFAULT_SETTINGS), ...raw.settings, auth: { ...DEFAULT_SETTINGS.auth, ...(raw.settings?.auth || {}) } };
     raw.ui = { filters: {}, searchHistory: [], dashboard: {}, ...(raw.ui || {}) };
     this.state = raw; this.#reindex();
-    if (this.fromSeed || from !== APP.schemaVersion) { KEYS.forEach((k) => this.dirty.add(k)); this.flush(); }
+    if (this.fromSeed) this.state.meta.seedVersion = this.seed?.version || 1;
+    if (this.fromSeed || this.reseeded || from !== APP.schemaVersion) { KEYS.forEach((k) => this.dirty.add(k)); this.flush(); }
     this.emit('load');
     return this;
   }
@@ -287,8 +296,8 @@ export class Store {
   loadSeed() {
     if (!this.seed) return;
     const s = clone(this.seed);
-    this.state.members = s.members; this.state.ledger = s.ledger; this.state.settings = { ...this.state.settings, fees: s.settings.fees, lodge: s.settings.lodge };
-    this.state.meta.sample = true; this.#reindex(); this.log('seed', 'data'); this.mark('members', 'ledger', 'settings', 'meta'); this.emit('reset');
+    this.state.members = s.members; this.state.ledger = s.ledger; this.state.settings = { ...this.state.settings, fees: s.settings.fees, lodge: s.settings.lodge, asOfYear: s.settings.asOfYear, debtFromYear: s.settings.debtFromYear };
+    this.state.meta.sample = true; this.state.meta.seedVersion = s.version || 1; this.#reindex(); this.log('seed', 'data'); this.mark('members', 'ledger', 'settings', 'meta'); this.emit('reset');
   }
 
   /** Remove every stored key (factory reset). */

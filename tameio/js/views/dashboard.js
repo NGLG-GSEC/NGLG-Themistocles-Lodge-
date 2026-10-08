@@ -23,7 +23,7 @@ export default {
     const dir = (v) => (v === null || Math.abs(v) < 0.05 ? 'flat' : v > 0 ? 'up' : 'down');
     root.innerHTML = `
       ${sectionHead('Πίνακας Ελέγχου', `<label class="inline">Έτος <select id="dash-year" aria-label="Έτος αναφοράς">${yearOptions(years, year)}</select></label><a class="btn sm" href="#/analytics">${icon('chart', { size: 15 })} Πλήρης ανάλυση</a>`, `${store.settings.lodge.fullName} · Ενημέρωση σε πραγματικό χρόνο`)}
-      ${store.isSample ? `<div class="notice" role="note">${icon('info')}<div><strong>Δεδομένα δείγματος.</strong> Η εφαρμογή περιέχει 22 μέλη από το μητρώο της Στοάς και <em>πλασματικό</em> ιστορικό πληρωμών. Εισάγετε το πραγματικό σας αρχείο από την ενότητα «Εισαγωγή» και καθαρίστε το δείγμα από τις «Ρυθμίσεις».</div></div>` : ''}
+      ${store.isSample ? `<div class="notice" role="note">${icon('info')}<div><strong>Δεδομένα δείγματος.</strong> Η εφαρμογή περιέχει τα 22 μέλη του μητρώου της Στοάς (χωρίς πληρωμές). Εισάγετε το πραγματικό σας αρχείο από την ενότητα «Εισαγωγή» και καθαρίστε το δείγμα από τις «Ρυθμίσεις».</div></div>` : ''}
       <div class="kpi-grid" aria-label="Βασικοί δείκτες">
         ${kpiCard({ label: 'Σύνολο μελών', value: fmtNum(c.total), sub: `${c.deleted ? c.deleted + ' διαγραμμένα' : 'εγγεγραμμένα'}`, ic: 'users', href: '#/members?status=' })}
         ${kpiCard({ label: 'Ενεργά μέλη', value: fmtNum(c.active), ic: 'check', tone: 'good', href: '#/members?status=active' })}
