@@ -93,15 +93,8 @@ export const COLORS = Object.freeze({
 
 export const DEFAULT_SETTINGS = Object.freeze({
   lodge: { name: 'Θεμιστοκλής', number: 96, fullName: 'Συμβολική Στοά Θεμιστοκλής υπ’ αριθμ. 96', province: 'Επαρχιακή Μεγάλη Στοά Πειραιώς και Αιγαίου', grandLodge: 'Εθνική Μεγάλη Στοά της Ελλάδος' },
-  // Annual contribution per category. Only 2027 is defined so far (edit in Ταμείο → Πρόγραμμα εισφορών).
-  fees: {
-    'ΤΑΚΤΙΚΟ': { 2026: 0, 2027: 200, 2028: 0, 2029: 0, 2030: 0 },
-    'ΜΕΤΟΙΚΟ': { 2026: 0, 2027: 100, 2028: 0, 2029: 0, 2030: 0 },
-    'ΥΙΟΘΕΤΗΜΕΝΟ': { 2026: 0, 2027: 20, 2028: 0, 2029: 0, 2030: 0 },
-    'ΕΠΙΤΙΜΟ': { 2026: 0, 2027: 0, 2028: 0, 2029: 0, 2030: 0 },
-    'ΟΜΟΤΙΜΟ': { 2026: 0, 2027: 0, 2028: 0, 2029: 0, 2030: 0 },
-    'ΔΙΑΓΡΑΦΕΝ': { 2026: 0, 2027: 0, 2028: 0, 2029: 0, 2030: 0 },
-  },
+  // Annual contribution per category, same for every year 2026–2030 (edit in Ταμείο → Πρόγραμμα εισφορών).
+  fees: Object.fromEntries(Object.entries({ 'ΤΑΚΤΙΚΟ': 200, 'ΜΕΤΟΙΚΟ': 100, 'ΥΙΟΘΕΤΗΜΕΝΟ': 20, 'ΕΠΙΤΙΜΟ': 0, 'ΟΜΟΤΙΜΟ': 0, 'ΔΙΑΓΡΑΦΕΝ': 0 }).map(([c, v]) => [c, Object.fromEntries([2026, 2027, 2028, 2029, 2030].map((y) => [y, v]))])),
   debtFromYear: 2027,
   asOfYear: null,          // null = current calendar year
   dueMonthDay: '03-31',    // payment due date used by compliance analysis

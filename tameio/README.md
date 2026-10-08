@@ -93,7 +93,7 @@ Status values: `active`, `former`, `archived`, `deleted` (soft delete). Schema m
 
 ## Treasury Module Guide
 - **Εισφορές ανά μέλος**: one money cell per member for 2026–2030. Type the new *total paid* and press Enter/Tab: the difference is stored as an adjustment ledger entry, so history is never lost.
-- **Categories & fees (2027):** Τακτικό 200 €, Μέτοικο 100 €, Υιοθετημένο 20 €, Επίτιμο 0, Ομότιμο 0, Διαγραμμένο (not a member, no fee). Other years are 0 until you set them in *Πρόγραμμα εισφορών*.
+- **Categories & fees (every year 2026–2030):** Τακτικό 200 €, Μέτοικο 100 €, Υιοθετημένο 20 €, Επίτιμο 0, Ομότιμο 0, Διαγραμμένο (not a member, no fee). Editable in *Πρόγραμμα εισφορών*.
 - **Expected fee** = fee schedule(category, year) or personal override; 0 for exempt members, years before initiation and years after leaving.
 - **Debt** = Σ max(0, expected − paid) from `debtFromYear` to the current year. **Collection rate** = min(paid, expected)/expected. **Debt ratio** = outstanding/expected.
 - Tabs: grid · ledger · debtors · fee schedule · analysis & forecast. Exports use the Reports engine.
