@@ -1,0 +1,28 @@
+/** In-app documentation: import/export, search, shortcuts, roles, accessibility, backup, PWA. */
+import { sectionHead, icon } from '../ui.js';
+import { APP, ROLES } from '../config.js';
+import { esc } from '../utils.js';
+
+export default {
+  id: 'docs', title: 'Οδηγίες',
+  render(root) {
+    root.innerHTML = `${sectionHead('Οδηγίες χρήσης & τεκμηρίωση', '', `${APP.name} v${APP.version}`)}
+    <div class="card prose">
+      <details open><summary>Γρήγορη εκκίνηση</summary><ol><li>Στην πρώτη εκκίνηση φορτώνονται <em>δεδομένα δείγματος</em> (22 μέλη, πλασματικές πληρωμές).</li><li>Πηγαίνετε στο <a href="#/import">Εισαγωγή</a> και ανεβάστε το αρχείο Excel της Στοάς (π.χ. Book2.xlsx).</li><li>Από τις <a href="#/settings">Ρυθμίσεις</a> επιλέξτε «Καθαρισμός» για να αφαιρέσετε το δείγμα (πριν ή μετά την εισαγωγή).</li><li>Ορίστε εισφορές στο <a href="#/treasury">Ταμείο</a> → «Πρόγραμμα εισφορών» και καταχωρίστε πληρωμές.</li><li>Κρατήστε τακτικά αντίγραφο ασφαλείας (Ρυθμίσεις → JSON).</li></ol></details>
+      <details><summary>Οδηγός εισαγωγής Excel / CSV / JSON</summary>
+        <h4>Βήματα του οδηγού</h4><ol><li><strong>Αρχείο:</strong> σύρετε ή επιλέξτε .xlsx/.xls/.csv/.json.</li><li><strong>Αντιστοίχιση στηλών:</strong> αυτόματη αναγνώριση (αγνοεί τόνους, κεφαλαία, τελείες) με δυνατότητα χειροκίνητης αλλαγής.</li><li><strong>Έλεγχος:</strong> στατιστικά (σύνολο, έγκυρες, άκυρες, διπλότυπα, παραλείψεις) και προεπισκόπηση ανά γραμμή.</li><li><strong>Επιβεβαίωση:</strong> επιλέξτε πολιτική διπλοτύπων και εισάγετε· δημιουργείται αναφορά (JSON/Excel/CSV).</li></ol>
+        <h4>Υποχρεωτικά πεδία</h4><p>Αριθμός μητρώου, όνομα, επώνυμο. Οι υπόλοιπες στήλες είναι προαιρετικές.</p>
+        <h4>Έλεγχος διπλοτύπων</h4><p>Με τον αριθμό μητρώου, το email και το κινητό — τόσο σε σχέση με τα υπάρχοντα μέλη όσο και μέσα στο ίδιο αρχείο.</p>
+        <h4>Καθαρισμός</h4><ul><li>Ονόματα → κεφαλαία, χωρίς τόνους.</li><li>Τηλέφωνα → <code>+30 697 799 9137</code>.</li><li>Email → πεζά + έλεγχος μορφής.</li><li>Ημερομηνίες → ISO· αναγνωρίζονται serial του Excel, <code>dd/mm/yyyy</code>, <code>dd.mm.yy</code>, <code>yyyy-mm-dd</code>.</li><li>Κατηγορία «5. ΔΙΑΓΡΑΦΕΝ» → κατάσταση «Πρώην».</li></ul>
+        <h4>Εξαγωγές</h4><p>Μητρώο, ταμείο, αναφορές και analytics εξάγονται σε <strong>PDF</strong>, <strong>Excel</strong>, <strong>CSV</strong> (UTF-8 με BOM, διαχωριστικό <code>;</code>), JSON και PNG (γραφήματα). Υπάρχει και εκτύπωση.</p></details>
+      <details><summary>Αναζήτηση</summary><p>Η αναζήτηση βρίσκει σε: αριθμό μητρώου, όνομα, επώνυμο, email, τηλέφωνο (και τα τελευταία ψηφία), κατοικία, αξίωμα, βαθμό, παρατηρήσεις. Πολλές λέξεις = όλες πρέπει να ταιριάζουν. Αγνοούνται τόνοι/κεφαλαία· λατινικά (greeklish) π.χ. <code>kreouzis</code> βρίσκει «ΚΡΕΟΥΖΗΣ». Για μεγάλα σύνολα χρησιμοποιείται Web Worker με αυτόματη εναλλακτική τοπική μηχανή.</p></details>
+      <details><summary>Συντομεύσεις πληκτρολογίου</summary><table class="tbl compact"><caption class="sr-only">Συντομεύσεις</caption><thead><tr><th scope="col">Πλήκτρο</th><th scope="col">Ενέργεια</th></tr></thead><tbody>
+        ${[['/ ή Ctrl+K', 'Εστίαση στη γενική αναζήτηση'], ['↓ / ↑', 'Πλοήγηση στις προτάσεις'], ['Enter', 'Επιλογή πρότασης ή υποβολή αναζήτησης'], ['Tab', 'Αποδοχή της πρότασης (δεύτερο Tab μετακινεί την εστίαση)'], ['Esc', 'Κλείσιμο προτάσεων / καθαρισμός πεδίου / κλείσιμο διαλόγου'], ['Alt+1…9', 'Μετάβαση στις ενότητες'], ['?', 'Λίστα συντομεύσεων']].map(([k, v]) => `<tr><td><kbd>${esc(k)}</kbd></td><td>${esc(v)}</td></tr>`).join('')}</tbody></table></details>
+      <details><summary>Ρόλοι χρηστών</summary><table class="tbl compact"><caption class="sr-only">Ρόλοι</caption><thead><tr><th scope="col">Ρόλος</th><th scope="col">Δικαιώματα</th></tr></thead><tbody>${Object.values(ROLES).map((r) => `<tr><td>${esc(r.label)}</td><td>${esc(r.can.join(', '))}</td></tr>`).join('')}</tbody></table></details>
+      <details><summary>Ταμείο: πώς υπολογίζονται τα ποσά</summary><ul><li><strong>Εισφορά</strong> = πρόγραμμα εισφορών της κατηγορίας για το έτος (ή προσωπική τιμή), μηδέν για απαλλαγμένα μέλη, για έτη πριν την εισδοχή και για έτη μετά την αποχώρηση.</li><li><strong>Καταβλήθηκαν</strong> = άθροισμα κινήσεων του έτους εισφοράς. Η αλλαγή ποσού στον πίνακα καταχωρεί αυτόματα την <em>διαφορά</em> ως κίνηση.</li><li><strong>Οφειλή</strong> = Σ max(0, εισφορά − καταβλήθηκαν) από το έτος έναρξης οφειλών έως το τρέχον έτος.</li><li><strong>Ποσοστό είσπραξης</strong> = min(καταβλήθηκαν, εισφορά) / εισφορά.</li><li><strong>Πρόβλεψη</strong> = αναμενόμενες εισφορές (+ νέα μέλη) × μέσο ιστορικό ποσοστό είσπραξης· εναλλακτικά γραμμική τάση.</li></ul></details>
+      <details><summary>Προσβασιμότητα</summary><p>Η εφαρμογή ακολουθεί WCAG 2.2 AA και ARIA: σύνδεσμος «μετάβαση στο περιεχόμενο», ορόσημα, ορατή εστίαση, πλήρης πλοήγηση με πληκτρολόγιο, combobox/listbox με <code>aria-activedescendant</code>, ανακοινώσεις μέσω <code>aria-live</code>, εναλλακτικοί πίνακες δεδομένων για κάθε γράφημα, σεβασμός στο <code>prefers-reduced-motion</code>.</p></details>
+      <details><summary>Offline & PWA</summary><p>Μετά την πρώτη φόρτωση η εφαρμογή λειτουργεί χωρίς σύνδεση (Service Worker + LocalStorage + IndexedDB). Μπορεί να εγκατασταθεί σε Windows, Android, iPhone και iPad.</p></details>
+      <details><summary>Ιδιωτικότητα & ασφάλεια</summary><p>Όλα τα δεδομένα μένουν στον περιηγητή σας· δεν αποστέλλονται πουθενά. Ο κωδικός είναι τοπική προστασία. Για δημόσιο GitHub Pages <strong>μην ανεβάζετε</strong> πραγματικά δεδομένα μελών στο αποθετήριο — εισάγετέ τα μόνο μέσα από την εφαρμογή.</p></details>
+    </div>`;
+  },
+};

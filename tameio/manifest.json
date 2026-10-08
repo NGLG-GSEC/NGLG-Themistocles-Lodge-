@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "TAMEIO THEMISTOCLES 96",
+  "short_name": "Ταμείο Θ96",
+  "description": "Διαχείριση μελών, ταμείου και αναλύσεων της Συμβολικής Στοάς Θεμιστοκλής υπ’ αριθμ. 96",
+  "lang": "el",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0B1F3A",
+  "theme_color": "#0B1F3A",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Μητρώο Μελών", "url": "./index.html#/members", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Ταμείο", "url": "./index.html#/treasury", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Εισαγωγή Excel", "url": "./index.html#/import", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
