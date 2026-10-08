@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "docs/**"
+      - "tameio/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch: {}
 
@@ -26,8 +27,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Assemble site (lodge website at /, TAMEIO app at /tameio/)
+        run: |
+          mkdir -p _site/tameio
+          cp -r docs/. _site/
+          rsync -a --exclude '.github' --exclude 'tools' --exclude '*.py' tameio/ _site/tameio/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
