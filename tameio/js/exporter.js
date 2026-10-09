@@ -38,6 +38,20 @@ function cellRaw(col, v) {
   return v;
 }
 
+/** Totals row for money/number columns (null when the table has none). Percent columns are not summed. */
+export function totalsRow(t) {
+  const sumCols = t.columns.filter((c) => c.type === 'money' || c.type === 'number');
+  if (!sumCols.length || !t.rows.length) return null;
+  const row = {}; let first = true;
+  for (const c of t.columns) {
+    if (sumCols.includes(c)) row[c.key] = t.rows.reduce((a, x) => a + (Number.isFinite(+x[c.key]) ? +x[c.key] : 0), 0);
+    else if (first) row[c.key] = 'Σύνολα';
+    else row[c.key] = '';
+    first = false;
+  }
+  return row;
+}
+
 /* --------------------------------- CSV --------------------------------- */
 export function tableToCSV(t, delimiter = ';') {
   const rows = [t.columns.map((c) => c.label), ...t.rows.map((r) => t.columns.map((c) => cellText(c, r[c.key])))];
@@ -151,6 +165,15 @@ export async function tableToPDF(t, o = {}) {
       cells.forEach((lns, i) => { const right = ['money', 'number', 'percent'].includes(t.columns[i].type); doc.text(lns, right ? x + widths[i] - 1.5 : x + 1.5, y + 3.7, { align: right ? 'right' : 'left' }); x += widths[i]; });
       doc.setDrawColor(225, 228, 235); doc.line(M, y + rh, M + usable, y + rh); y += rh;
     });
+    const tot = totalsRow(t);
+    if (tot) {
+      if (ensure(9)) drawHead();
+      doc.setFillColor(245, 240, 220); doc.rect(M, y, usable, 7, 'F'); doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(M, y, M + usable, y); doc.setLineWidth(0.2);
+      doc.setFont('DejaVu', 'bold'); doc.setTextColor(...NAVY);
+      let x = M;
+      t.columns.forEach((c, i) => { const right = ['money', 'number', 'percent'].includes(c.type); const txt = cellText(c, tot[c.key]); if (txt) doc.text(txt, right ? x + widths[i] - 1.5 : x + 1.5, y + 4.7, { align: right ? 'right' : 'left', maxWidth: widths[i] - 3 }); x += widths[i]; });
+      y += 7; doc.setTextColor(0, 0, 0); doc.setFont('DejaVu', 'normal');
+    }
   }
 
   const pages = doc.getNumberOfPages();
@@ -167,13 +190,15 @@ export async function exportPDF(t, filename, o) { const doc = await tableToPDF(t
 /** Print a table through a hidden iframe (browser "Save as PDF" works too). */
 export function printTable(t, lodge = 'Συμβολική Στοά Θεμιστοκλής υπ’ αριθμ. 96') {
   const head = t.columns.map((c) => `<th>${esc(c.label)}</th>`).join('');
+  const tot = totalsRow(t);
+  const foot = tot ? `<tfoot><tr>${t.columns.map((c) => `<td class="${['money', 'number', 'percent'].includes(c.type) ? 'r' : ''}">${esc(cellText(c, tot[c.key]))}</td>`).join('')}</tr></tfoot>` : '';
   const body = t.rows.map((r) => `<tr>${t.columns.map((c) => `<td class="${['money', 'number', 'percent'].includes(c.type) ? 'r' : ''}">${esc(cellText(c, r[c.key]))}</td>`).join('')}</tr>`).join('');
   const sum = (t.summary || []).map(([k, v]) => `<div class="k"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
   const html = `<!doctype html><html lang="el"><head><meta charset="utf-8"><title>${esc(t.title)}</title><style>
     body{font:11px/1.35 "Segoe UI",Arial,sans-serif;color:#111;margin:16px}h1{font-size:16px;margin:0;color:#0B1F3A}h2{font-size:11px;margin:2px 0 10px;color:#7a6420;font-weight:400}
     .bar{border-bottom:3px solid #D4AF37;margin-bottom:8px}.k{display:inline-block;margin:0 8px 8px 0;padding:5px 9px;background:#f6f1de;border-radius:4px}.k span{display:block;font-size:9px;color:#555}
-    table{border-collapse:collapse;width:100%}th{background:#0B1F3A;color:#fff;text-align:left;padding:4px 5px;font-size:10px}td{border-bottom:1px solid #ddd;padding:3px 5px;vertical-align:top}td.r{text-align:right}tr:nth-child(even) td{background:#f7f8fb}
-    @page{size:A4 landscape;margin:10mm}</style></head><body><div class="bar"><h1>${esc(t.title)}</h1><h2>${esc(t.subtitle || lodge)} — ${new Date().toLocaleDateString('el-GR')}</h2></div>${sum}<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></body></html>`;
+    table{border-collapse:collapse;width:100%}th{background:#0B1F3A;color:#fff;text-align:left;padding:4px 5px;font-size:10px}td{border-bottom:1px solid #ddd;padding:3px 5px;vertical-align:top}td.r{text-align:right}tfoot td{font-weight:700;background:#f6f1de;border-top:2px solid #D4AF37}tr:nth-child(even) td{background:#f7f8fb}
+    @page{size:A4 landscape;margin:10mm}</style></head><body><div class="bar"><h1>${esc(t.title)}</h1><h2>${esc(t.subtitle || lodge)} — ${new Date().toLocaleDateString('el-GR')}</h2></div>${sum}<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody>${foot}</table></body></html>`;
   const f = document.createElement('iframe'); f.setAttribute('aria-hidden', 'true'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
   document.body.appendChild(f); f.contentDocument.open(); f.contentDocument.write(html); f.contentDocument.close();
   setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } finally { setTimeout(() => f.remove(), 2000); } }, 250);
