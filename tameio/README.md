@@ -102,7 +102,7 @@ Status values: `active`, `former`, `archived`, `deleted` (soft delete). Schema m
 *Analytics* applies the filters to every chart and KPI. Each chart has **PNG** export and an accessible **data table**; the page exports to **PDF** (charts + KPIs), **Excel** (one sheet per analysis) and one combined **PNG**. Forecasts combine the fee schedule × historical collection rate (with ± band) and a linear trend model. Anomalies: duplicates, non-chronological degree dates, implausible ages, unpaid years, over-payments, statistical outliers (>3σ).
 
 ## Offline Mode
-After the first visit the Service Worker caches the whole app (network-first for the page, stale-while-revalidate for assets). Data is stored locally, so the app works without a connection; a status chip shows online/offline and save state (autosave on every change).
+After the first visit the Service Worker caches the whole app (network-first for the page, network-first for code, cache-first for assets). Data is stored locally, so the app works without a connection; a status chip shows online/offline and save state (autosave on every change).
 
 ## PWA Installation
 Windows/Chrome/Edge: install icon in the address bar · Android: ⋮ → *Install app* · iPhone/iPad (Safari): *Share → Add to Home Screen*. Icons: `assets/icons` (192, 512, maskable, Apple touch).
