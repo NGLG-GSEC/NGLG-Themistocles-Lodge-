@@ -1,6 +1,6 @@
 /* TAMEIO THEMISTOCLES 96 — Service Worker (offline-first app shell).
  * Bump VERSION (build_release.py does it) to invalidate caches on release. */
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const CACHE = `t96-v${VERSION}`;
 // PRECACHE-START
 const PRECACHE = [
@@ -84,12 +84,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: stale-while-revalidate.
+  // App code and data (js, css, json, html): network first so a new deploy is picked up immediately; cache when offline.
+  // Heavy static files (vendor libs, fonts, icons, samples): cache first.
+  const heavy = /\/assets\//.test(url.pathname);
   event.respondWith(
     caches.open(CACHE).then(async (cache) => {
       const cached = await cache.match(req, { ignoreSearch: true });
-      const network = fetch(req).then((res) => { if (res && res.ok) cache.put(req, res.clone()); return res; }).catch(() => null);
-      return cached || (await network) || new Response('Εκτός σύνδεσης', { status: 503, statusText: 'Offline', headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      if (heavy && cached) return cached;
+      try {
+        const res = await fetch(req, heavy ? undefined : { cache: 'no-cache' });
+        if (res && res.ok) cache.put(req, res.clone());
+        return res;
+      } catch {
+        return cached || new Response('Εκτός σύνδεσης', { status: 503, statusText: 'Offline', headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      }
     })
   );
 });

@@ -136,6 +136,7 @@ export const SUITES = [
       ['Αυτόματη ανίχνευση διαχωριστικού', () => { eq(parseCSV('a,b\n1,2')[1], ['1', '2']); eq(parseCSV('a;b\n1;2')[1], ['1', '2']); eq(parseCSV('a\tb\n1\t2')[1], ['1', '2']); }],
       ['Μορφοποίηση ποσών/ημερομηνιών στο CSV', () => { const s = tableToCSV({ columns: [{ key: 'd', label: 'D', type: 'date' }, { key: 'm', label: 'M', type: 'money' }], rows: [{ d: '2026-03-05', m: 1234.5 }] }); ok(s.includes('05/03/2026')); ok(/1\.234,50/.test(s), s); }],
       ['Εξαγωγή μητρώου: 19 στήλες', () => { eq(MEMBER_COLUMNS.length, 19); const s = tableToCSV({ columns: MEMBER_COLUMNS, rows: memberRows(SEED.members) }); eq(parseCSV(s).length, 23); }],
+      ['Γραμμή συνόλων στο CSV και στο Excel', async () => { const t = { title: 'T', columns: [{ key: 'n', label: 'Μέλος' }, { key: 'a', label: 'A', type: 'money' }], rows: [{ n: 'x', a: 100.1 }, { n: 'y', a: 0.2 }] }; const rows = parseCSV(tableToCSV(t)); eq(rows.at(-1).map((c) => c.replace(/\s/g, ' ')), ['Σύνολα', '100,30 €']); eq(rows.length, 4); const X = await I.getXLSX(); const ws = X.read(await tablesToXLSX([t]), { type: 'array' }).Sheets.T; eq(ws.A4.v, 'Σύνολα'); near(ws.B4.v, 100.3); eq(ws.B4.t, 'n'); }],
       ['Μη υποστηριζόμενη μορφή εξαγωγής δίνει σφάλμα', async () => { let thrown = false; try { await exportAs('docx', { columns: [], rows: [] }, 'x'); } catch { thrown = true; } ok(thrown); }],
     ],
   },

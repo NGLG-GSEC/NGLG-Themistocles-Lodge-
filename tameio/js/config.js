@@ -4,7 +4,7 @@
  */
 export const APP = Object.freeze({
   name: 'TAMEIO THEMISTOCLES 96',
-  version: '1.0.0',
+  version: '1.0.1',
   schemaVersion: 1,
   storagePrefix: 't96.',
   idbName: 't96-tameio',

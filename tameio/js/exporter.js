@@ -54,7 +54,8 @@ export function totalsRow(t) {
 
 /* --------------------------------- CSV --------------------------------- */
 export function tableToCSV(t, delimiter = ';') {
-  const rows = [t.columns.map((c) => c.label), ...t.rows.map((r) => t.columns.map((c) => cellText(c, r[c.key])))];
+  const tot = totalsRow(t);
+  const rows = [t.columns.map((c) => c.label), ...t.rows.map((r) => t.columns.map((c) => cellText(c, r[c.key]))), ...(tot ? [t.columns.map((c) => cellText(c, tot[c.key]))] : [])];
   return `﻿${toCSV(rows, delimiter)}`;
 }
 export function exportCSV(t, filename, delimiter = ';') { download(tableToCSV(t, delimiter), `${filename}.csv`, 'text/csv;charset=utf-8'); }
@@ -64,7 +65,8 @@ export function exportCSV(t, filename, delimiter = ';') { download(tableToCSV(t,
 export async function tablesToXLSX(tables) {
   const XLSX = await getXLSX(); const wb = XLSX.utils.book_new(); const used = new Set();
   for (const t of tables) {
-    const aoa = [t.columns.map((c) => c.label), ...t.rows.map((r) => t.columns.map((c) => cellRaw(c, r[c.key])))];
+    const tot = totalsRow(t);
+    const aoa = [t.columns.map((c) => c.label), ...t.rows.map((r) => t.columns.map((c) => cellRaw(c, r[c.key]))), ...(tot ? [t.columns.map((c) => cellRaw(c, tot[c.key]))] : [])];
     if (t.summary?.length) { aoa.push([]); for (const [k, v] of t.summary) aoa.push([k, v]); }
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     ws['!cols'] = t.columns.map((c, i) => ({ wch: Math.min(48, Math.max(c.label.length + 2, ...t.rows.slice(0, 200).map((r) => String(cellText(c, r[c.key])).length + 2), 8)) }));
